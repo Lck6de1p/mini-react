@@ -1,9 +1,9 @@
-import { render } from "./React.js";
+import React from "./React.js";
 const ReactDOM = {
-  createElement: (container) => {
+  createRoot: (container) => {
     return {
       render: (dom) => {
-        render(dom, container);
+        React.render(dom, container);
       },
     };
   },
