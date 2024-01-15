@@ -4,20 +4,7 @@ import React from "./React";
 describe("createElement", () => {
   it("createElement render props is null", () => {
     const vNode = React.createElement("div", null, "hello world");
-    expect(vNode).toMatchInlineSnapshot({
-      type: "div",
-      props: {
-        children: [
-          {
-            type: "TEXT_ELEMENT",
-            props: {
-              nodeValue: "hello world",
-              children: [],
-            },
-          },
-        ],
-      },
-    }, `
+    expect(vNode).toMatchInlineSnapshot(`
       {
         "props": {
           "children": [
@@ -36,22 +23,7 @@ describe("createElement", () => {
   });
   it("createElement render with props", () => {
     const vNode = React.createElement("div", {id: '11', class: 'class'}, "hello world");
-    expect(vNode).toMatchInlineSnapshot({
-      type: "div",
-      props: {
-        id: '11',
-        class: 'class',
-        children: [
-          {
-            type: "TEXT_ELEMENT",
-            props: {
-              nodeValue: "hello world",
-              children: [],
-            },
-          },
-        ],
-      },
-    }, `
+    expect(vNode).toMatchInlineSnapshot(`
       {
         "props": {
           "children": [
