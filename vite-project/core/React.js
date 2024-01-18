@@ -70,21 +70,29 @@ function commitWork(fiber) {
   }
 }
 
-function performUnitOfWork(fiber) {
-  const isFunctionComponent = typeof fiber.type === "function";
-  if (!isFunctionComponent) {
-    if (!fiber.dom) {
-      const dom = (fiber.dom = createDom(fiber.type));
+function updateFunctionComponent(fiber) {
+  const children = [fiber.type(fiber.props)];
+  initChildren(fiber, children);
+}
 
-      updateProps(dom, fiber.props);
-    }
+function updateHostComponent(fiber) {
+  if (!fiber.dom) {
+    const dom = (fiber.dom = createDom(fiber.type));
+
+    updateProps(dom, fiber.props);
   }
-  const children = isFunctionComponent
-    ? [fiber.type(fiber.props)]
-    : fiber.props.children;
+  const children = fiber.props.children;
 
   initChildren(fiber, children);
+}
 
+function performUnitOfWork(fiber) {
+  const isFunctionComponent = typeof fiber.type === "function";
+  if (isFunctionComponent) {
+    updateFunctionComponent(fiber);
+  } else {
+    updateHostComponent(fiber);
+  }
   // 返回下一个任务
 
   if (fiber.child) return fiber.child;
