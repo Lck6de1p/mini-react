@@ -1,7 +1,10 @@
 import React from "./core/React.js";
 
 const Count = ({ num }) => {
-  return <div>count: {num}</div>;
+    const handleClick = () => {
+        console.log('click')
+    }
+  return <div onClick={() => handleClick()}>count: {num}</div>;
 };
 
 const CountContainer = ({ num }) => {
@@ -13,7 +16,7 @@ function App() {
         <div>hi</div>
         <div>mini</div>
       <CountContainer num={1} />
-      <CountContainer num={2} />
+      {/* <CountContainer num={2} /> */}
     </div>;
 }
 export default App;

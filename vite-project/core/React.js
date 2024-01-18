@@ -117,7 +117,12 @@ function createDom(type) {
 function updateProps(dom, props) {
   Object.keys(props).forEach((key) => {
     if (key !== "children") {
-      dom[key] = props[key];
+      if (key.startsWith('on')) {
+        const event = key.slice(2).toLocaleLowerCase()
+        dom.addEventListener(event, props[key]);
+      }  else {
+        dom[key] = props[key];
+      }
     }
   });
 }
