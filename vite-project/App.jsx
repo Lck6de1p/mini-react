@@ -1,10 +1,13 @@
 import React from "./core/React.js";
 
+let count = 0;
 const Count = ({ num }) => {
     const handleClick = () => {
         console.log('click')
+        count++
+        React.update();
     }
-  return <div onClick={() => handleClick()}>count: {num}</div>;
+  return <div onClick={() => handleClick()}>count: {count}</div>;
 };
 
 const CountContainer = ({ num }) => {
