@@ -1,25 +1,34 @@
 import React from "./core/React.js";
 
 let count = 0;
-const Count = ({ num }) => {
-    const handleClick = () => {
-        console.log('click')
-        count++
-        React.update();
-    }
-  return <div onClick={() => handleClick()}>count: {count}</div>;
-};
+let count2 = 0;
 
-const CountContainer = ({ num }) => {
-  return <Count num={num} />;
-};
+function Foo() {
+    console.log('foo render')
+    const update = React.update();
+
+    const handleClick = () => {
+        count++;
+        update();
+    }
+    return <div>{count}<button onClick={handleClick}> click</button></div>
+}
+
+function Bar() {
+    const update = React.update();
+    console.log('Bar render')
+    const handleClick = () => {
+        count2++;
+        update();
+    }
+    return <div>{count2}<button onClick={handleClick}> click</button></div>
+}
 
 function App() {
+  
     return <div>
-        <div>hi</div>
-        <div>mini</div>
-      <CountContainer num={1} />
-      {/* <CountContainer num={2} /> */}
+       <Foo />
+       <Bar />
     </div>;
 }
 export default App;
