@@ -1,6 +1,7 @@
 import React from "./core/React.js";
 
 function Foo() {
+    console.log('rerender')
   const [count, setCount] = React.useState(10);
   const [bar, setBar] = React.useState("bar");
   const handleClick = () => {
