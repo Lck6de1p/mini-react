@@ -7,7 +7,7 @@ function Foo() {
     setCount((e) => e + 1);
   };
   const handleClick2 = () => {
-    setBar((e) => e + "bar");
+    setBar("barbar");
   };
   return (
     <div>
