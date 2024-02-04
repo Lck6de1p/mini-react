@@ -43,7 +43,7 @@ function workLoop(deadline) {
   let isYield = false;
   while (!isYield && nextUnitOfWork) {
     nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
-    if (wipRoot?.sibling?.type === nextUnitOfWork?.type  ) {
+    if (wipRoot?.sibling?.type === nextUnitOfWork?.type) {
       nextUnitOfWork = null;
     }
     isYield = deadline.timeRemaining() < 1;
@@ -98,6 +98,8 @@ function commitWork(fiber) {
 }
 
 function updateFunctionComponent(fiber) {
+  stateHooks = [];
+  stateHookIndex = 0;
   wipFiber = fiber;
   const children = [fiber.type(fiber.props)];
   reconcileChildren(fiber, children);
@@ -220,19 +222,44 @@ function update() {
   let currentFiber = wipFiber;
 
   return () => {
-    console.log(currentFiber);
     wipRoot = {
-     ...currentFiber,
-     alternate: currentFiber
+      ...currentFiber,
+      alternate: currentFiber,
     };
     nextUnitOfWork = wipRoot;
   };
+}
+
+let stateHooks = [];
+let stateHookIndex = 0;
+function useState(initial) {
+  let currentFiber = wipFiber;
+  let oldStateHook = currentFiber.alternate?.stateHooks[stateHookIndex];
+  const stateHook = {
+    state: oldStateHook ? oldStateHook.state : initial,
+  };
+  stateHooks.push(stateHook);
+  stateHookIndex++;
+
+  currentFiber.stateHooks = stateHooks;
+
+  function setState(action) {
+    stateHook.state = action(stateHook.state);
+    wipRoot = {
+      ...currentFiber,
+      alternate: currentFiber,
+    };
+    nextUnitOfWork = wipRoot;
+  }
+
+  return [stateHook.state, setState];
 }
 
 const React = {
   update,
   render,
   createElement,
+  useState,
 };
 
 export default React;
