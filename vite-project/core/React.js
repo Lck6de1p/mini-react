@@ -62,8 +62,47 @@ function commitRoot(fiber) {
   deletions.forEach(commitDeletion);
   commitWork(fiber);
   currentRoot = wipRoot;
+  commitEffectHook();
   wipRoot = null;
   deletions = [];
+}
+
+function commitEffectHook() {
+  function run(fiber) {
+    if (!fiber) return;
+    if (!fiber.alternate) {
+      fiber.effectHooks?.forEach((hook) => {
+        hook.cleanup = hook.callback();
+      });
+    } else {
+      fiber.effectHooks?.forEach((newHook, index) => {
+        const oldEffectHook = fiber.alternate.effectHooks;
+        if (newHook.deps.length > 0) {
+          const needUpdate = newHook.deps.some(
+            (v, i) => v !== oldEffectHook[index].deps[i]
+          );
+          needUpdate && (newHook.cleanup = newHook.callback());
+        }
+      });
+    }
+
+    run(fiber.child);
+    run(fiber.sibling);
+  }
+
+  function runCleanup(fiber) {
+    if (!fiber) return;
+    fiber.alternate?.effectHooks.forEach((hook) => {
+      if (hook.deps.length > 0) {
+        hook.cleanup();
+      }
+    });
+
+    run(fiber.child);
+    run(fiber.sibling);
+  }
+  runCleanup(wipFiber);
+  run(wipFiber);
 }
 
 function commitDeletion(fiber) {
@@ -101,6 +140,7 @@ function updateFunctionComponent(fiber) {
   stateHooks = [];
   stateHookIndex = 0;
   wipFiber = fiber;
+  effectHooks = [];
   const children = [fiber.type(fiber.props)];
   reconcileChildren(fiber, children);
 }
@@ -239,20 +279,23 @@ function useState(initial) {
     state: oldStateHook ? oldStateHook.state : initial,
     queue: oldStateHook ? oldStateHook.queue : [],
   };
-  stateHook.queue.forEach(action =>stateHook.state = action(stateHook.state))
+  stateHook.queue.forEach(
+    (action) => (stateHook.state = action(stateHook.state))
+  );
 
   stateHook.queue = [];
 
   stateHooks.push(stateHook);
-  
+
   stateHookIndex++;
 
   currentFiber.stateHooks = stateHooks;
 
   function setState(action) {
-    const eagerState = typeof action === 'function' ? action(stateHook.state) : action;
-    if (eagerState === stateHook.state) return
-    stateHook.queue.push(typeof action === 'function' ? action : () => action);
+    const eagerState =
+      typeof action === "function" ? action(stateHook.state) : action;
+    if (eagerState === stateHook.state) return;
+    stateHook.queue.push(typeof action === "function" ? action : () => action);
     wipRoot = {
       ...currentFiber,
       alternate: currentFiber,
@@ -263,11 +306,23 @@ function useState(initial) {
   return [stateHook.state, setState];
 }
 
+let effectHooks = [];
+function useEffect(callback, deps = []) {
+  const effectHook = {
+    callback,
+    deps,
+    cleanup: undefined,
+  };
+  effectHooks.push(effectHook);
+  wipFiber.effectHooks = effectHooks;
+}
+
 const React = {
   update,
   render,
   createElement,
   useState,
+  useEffect,
 };
 
 export default React;
